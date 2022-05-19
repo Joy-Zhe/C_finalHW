@@ -3,6 +3,13 @@
 #include<math.h>
 #include<stdlib.h>
 
+struct token{
+    char ch[10000];//储存这个token的具体内容比如“void swap(){int a = 1;........................}”
+    char doc[100];//储存这个token所在文件的文件名比如“librarysystem.c”
+    int startline;//这个token的第一行的行号
+    int endline;//这个token最后一行的行号
+}Mtoken[100000];
+
 typedef struct subToken{//链表表头存放当前串的信息（因为无需记录第一个出现的子串），而每次遍历都是从头开始的，故可将表头作为索引
     int index;//存放找到的
 	char *head;// 仅在存放表头时有效，即subToken_index[i]->head
@@ -15,16 +22,16 @@ void map_add(LinkList *list, int n/*, char *subToken*/);
 void map_key(LinkList *list[], char *subToken/*, char *Token[]*/, int start_pos, int sublen);//构建映射表
 int judge(char *s, char *f);//判断s是否在已有映射表中的当前键内
 
-int mapping_main (){//之后改成映射函数
+int /*mapping_*/main (){//之后改成映射函数
     char subToken[100001];//存放当次子串
-    char Token[100001][100001];//母串
+    //char Token[100001][100001];//母串 //改为使用新的结构体数组
     int index_Token = 1, sublen = 0, pos = 0, index_subToken = 1;
     //取出键
-    while(Token[index_Token][0]){
+    while(Mtoken[index_Token].ch[0]){
         for(int i = pos; i < pos + sublen; i++){
-            subToken[i - pos] = Token[index_Token][i];
+            subToken[i - pos] = Mtoken[index_Token].ch[i];
         }
-        if(!Token[index_Token][pos + sublen]){
+        if(!Mtoken[index_Token].ch[pos + sublen]){
             pos = pos + sublen; //未到达此Token串的尾部则继续存放子串
         }else index_Token++;
 		map_key(M, subToken/*, Token*/, index_Token, sublen);
