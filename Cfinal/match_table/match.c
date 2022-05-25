@@ -4,7 +4,7 @@
 #include<stdlib.h>
 
 struct token{
-    char ch[10000];//储存这个token的具体内容比如“void swap(){int a = 1;........................}”
+    char *ch/*[10000]*/;//储存这个token的具体内容比如“void swap(){int a = 1;........................}”
     char doc[100];//储存这个token所在文件的文件名比如“librarysystem.c”
     int startline;//这个token的第一行的行号
     int endline;//这个token最后一行的行号
@@ -23,15 +23,15 @@ int M_book = 0;
 LinkList *map_create(/*int n, */char *subToken);//遇到未加入映射表的subToken，建立新的键
 void map_add(LinkList *list, int n/*, char *subToken*/);
 void map_key(LinkList *list[], char *subToken/*, char *Token[]*/, int start_pos, int sublen);//构建映射表
-int judge(LinkList *M_now, int n)//判断该subToken所在的Token是否已经在映射表中被记录过
+int judge(LinkList *M_now, int n);//判断该subToken所在的Token是否已经在映射表中被记录过
 
 int /*mapping_*/main (){//之后改成映射函数
 	int cnt_token = 2, i = 1;
-	//Mtoken[1].ch = "ab";
-    //Mtoken[2].ch = "dnab";
+	Mtoken[1].ch = "ab";
+    Mtoken[2].ch = "dnab";
 	char subToken[100001];//存放当次子串
     //char Token[100001][100001];//母串 //改为使用新的结构体数组
-    int index_Token = 1, sublen = 0, pos = 0, index_subToken = 1;
+    int index_Token = 1, sublen = 1, pos = 0, index_subToken = 1;
     //取出键
 	for(i = 1; i <= cnt_token; i++){
 		pos = 0;
@@ -44,7 +44,7 @@ int /*mapping_*/main (){//之后改成映射函数
 		}
 	}LinkList *p;
 	//测试输出
-	for(int j = 0;j<=M_book;j++){
+	for(int j = 0;j <= M_book; j++){
 		printf("%s",M[j]->contain);
 		for(p = M[j]; p; p = p->next){
 			printf("%d\n", p->index);
