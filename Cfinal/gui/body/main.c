@@ -32,8 +32,6 @@
 #define PATH
 #define ADDEDFILE 
 
-
-
 void CharEventProcess(char ch){
 	uiGetChar(ch); // GUI字符输入
 	display(); //刷新显示
@@ -119,8 +117,6 @@ void drawButtons(){
 	double x = GetWindowWidth() / 2.5;  
 	double y = 0; 
 	double w = GetWindowWidth() / 5; // 控件宽度
-
-	
 	if( button(GenUIID(0), x + 2 * w, y, w, h, "退出") ) 
 		exit(-1);
 }
@@ -129,6 +125,8 @@ void drawButtons(){
 
 #if defined(TYPEAREA) //操作区
 void typeArea(){ 
+	double x_List = GetWindowHeight() - TextStringWidth("EEEEE");
+	double y_List = GetWindowHeight() - GetFontHeight();
 	double h = GetWindowHeight() / 20;  // 操作区高度 
 	double fH = GetFontHeight();
 	double h0 = fH*2;  // 控件高度 
@@ -139,24 +137,30 @@ void typeArea(){
 	static char filename1[300] = "";
 	static int flag_button = 0;//判断是否按下“添加”按钮， 按下为1 
 	int n = 0;
-	
-	SetPenColor("Black"); 
-	drawLabel(x - TextStringWidth("输入路径："), y + fH * 3, "输入路径：");
-	drawLabel(x - TextStringWidth("输入文件名："), y - fH * 3, "输入文件名：");
-	textbox(GenUIID(0), x, y + fH * 3, w, h, path1, sizeof(path1));
-	textbox(GenUIID(0), x, y - fH * 3, w, h, filename1, sizeof(filename1));
-	if( button(GenUIID(0), x + 2 * w, y, w, h, "添加") ){
+	SetPenColor("Yellow"); 
+	drawRectangle(0.5, GetWindowHeight() / 4, GetWindowWidth() / 2, GetWindowHeight() / 2, 1);
+	SetPenColor("Black");
+	drawLabel(0.8, y + fH * 3 + 0.1, "输入路径：");
+	drawLabel(0.8, y - fH * 3 + 0.1, "输入文件名：");
+	textbox(GenUIID(0), 0.8 + TextStringWidth("输入文件名："), y + fH * 2.7, GetWindowWidth() / 3, h, path1, sizeof(path1));
+	textbox(GenUIID(0), 0.8 + TextStringWidth("输入文件名："), y - fH * 2.7, GetWindowWidth() / 3, h, filename1, sizeof(filename1));
+	if( button(GenUIID(0), 0, 0, w, h0, "添加") && path1[0]){
 		//path(path1, filename1);//打开文件进行操作
 		flag_button = 1;
-	}
-	if(flag_button){
+		path_book++;
+		f_path[path_book] = 1;
 		sprintf(path_opened[path_book], "%s%s", path1, filename1);
-		drawLabel(x - TextStringWidth("EEEEEEEEEEEEEEE"), y - fH * 7, path_total);//在界面显示已添加文件
+		fp[path_book] = fopen(path_opened[path_book], "w");//打开文件 
 		while(path1[n] || filename1[n]){
 			path1[n] = 0;
 			filename1[n] = 0;
 			n++;
 		}//清空文本框 
+	}
+	int List_i = 1;
+	while(List_i <= path_book){
+		drawLabel(x_List - TextStringWidth("EEEEEEEEEEEEEEE"), y_List - fH * List_i, path_opened[List_i]);//在界面显示已添加文件
+		List_i++;
 	}
 }
 #endif
@@ -170,5 +174,9 @@ void display(){
 } 
 #endif 
 
+/*struct default {
+	int a[10000];//a[1]存对应元素的Token编号 
+	int n;//记录该类中的元素个数
+} */
 
 

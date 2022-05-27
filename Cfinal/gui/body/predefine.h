@@ -1,8 +1,10 @@
 #ifndef _PREDEFINE_H_
 #define _PREDEFINE_H_
  
-static char path_opened[300000][300] = "";//存放已打开的文件、路径 
+static char path_opened[300000][300] = {{0}};//存放已打开的文件、路径 
 static int path_book;//用于遍历已打开的文件、路径 
+static int f_path[300000];
+FILE *fp[300000];
 
 void display();
 void Menu();
