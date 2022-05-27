@@ -23,11 +23,7 @@
 #define DISPLAY
 #define MENU
 #define BUTTONS
-#define APPAREA
-#define SCOREAREA
 #define TYPEAREA
-#define N2S
-#define RANK
 #define TIMER_TOTAL 1
 #define PATH
 #define ADDEDFILE 
@@ -55,6 +51,9 @@ void TimerEventProcess(int timerID){
 	}
 }
 
+int S2N (char *num);
+void N2S(int num, char *s);
+
 void Main (){
     InitGraphics();
 	registerCharEvent(CharEventProcess);        // 字符
@@ -64,26 +63,32 @@ void Main (){
 	startTimer(TIMER_TOTAL, 10);
 }
 
-# 
-
-#if defined(PATH)
-void path(char *s_path, char *filename){
-	FILE *fp;
-	char path1[]={0};//存储最终的文件读取路径 
-	sprintf(path1, "%s%s", s_path, filename);//拼接s_path+filename，形成完整的文件路径 
-	fp = fopen(path1, "rb");//打开文件 
-    char ch = fgetc(fp);
-    while(ch != EOF){
-        //文件已打开 ,添加操作 
-    }
-    fclose(fp);
-    return;
+// 字符串转换整型 
+int S2N (char *num){
+	int ans = 0, i = 0;
+	while(*(num + i)){
+		ans = ans * 10 + *(num + i) - '0';
+		i++;
+	}
+	return ans;
 }
-#endif
+
+void N2S(int num, char *s){
+	int tmp = num, cnt = 0, cnt_s = 0;
+	while (tmp){
+		cnt++;
+		tmp /= 10;
+	}
+	while (cnt){
+		s[cnt_s] = num / (pow(10, cnt-1)) + '0';
+		num = num - (num / (int)(pow(10, cnt-1))) * (int)(pow(10, cnt-1));
+		cnt_s++;
+		cnt--;
+	}
+}
 
 #if defined(MENU) //菜单 
 void Menu(){
-	
 	static char *menuListAbout[] = {"关于", "帮助", "退出"};
 	double w = TextStringWidth(menuListAbout[0]) * 2, h = 0.4, x = 0, wsub = TextStringWidth("。菜单") * 1.2, y = GetWindowHeight() - h;
 	static char *selectedLabel = NULL;
@@ -134,8 +139,9 @@ void typeArea(){
 	double y = GetWindowHeight() / 2 - h0 / 2; 
 	static char path1[300] = ""; 
 	static char filename1[300] = "";
+	static char delete_num[300] = "";
 	static int flag_button = 0;//判断是否按下“添加”按钮， 按下为1 
-	int n = 0;
+	int n = 0, delete_book = 0;
 	SetPenColor("Yellow"); 
 	drawRectangle(0.5, GetWindowHeight() / 4, GetWindowWidth() / 2, GetWindowHeight() / 2, 1);
 	SetPenColor("Black");
@@ -143,7 +149,7 @@ void typeArea(){
 	drawLabel(0.8, y + 0.1, "输入文件名：");
 	textbox(GenUIID(0), 0.8 + TextStringWidth("输入文件名："), y + fH * 4.7, GetWindowWidth() / 3, h, path1, sizeof(path1));
 	textbox(GenUIID(0), 0.8 + TextStringWidth("输入文件名："), y , GetWindowWidth() / 3, h, filename1, sizeof(filename1));
-	if( button(GenUIID(0), 0.5 + GetWindowWidth() / 4 - w / 2, GetWindowHeight() / 3, w, h0, "添加") && path1[0]){
+	if( button(GenUIID(0), 0.5 + GetWindowWidth() / 4 - w / 2, GetWindowHeight() / 3 + fH * 2.3, w, h0, "添加") && path1[0]){
 		//path(path1, filename1);//打开文件进行操作
 		flag_button = 1;
 		path_book++;
@@ -156,31 +162,51 @@ void typeArea(){
 			n++;
 		}//清空文本框 
 	}
-	if( button(GenUIID(0), 0.5 + GetWindowWidth() / 4 - w / 2, GetWindowHeight() * 4 / 15, w, h0, "删除") && path1[0]){
-		//path(path1, filename1);//打开文件进行操作
-		flag_button = 1;
-		path_book++;
-		f_path[path_book] = 1;
-		sprintf(path_opened[path_book], "%s%s", path1, filename1);
-		fp[path_book] = fopen(path_opened[path_book], "w");//打开文件 
-		while(path1[n] || filename1[n]){
-			path1[n] = 0;
-			filename1[n] = 0;
+	drawLabel(0.5 + GetWindowWidth() / 4 - w / 2, GetWindowHeight() * 4 / 15, "需删除：");
+	textbox(GenUIID(0), 0.5 + GetWindowWidth() / 4, GetWindowHeight() * 4 / 15 - 0.1, TextStringWidth("3000000"), fH * 1.5, delete_num, sizeof(delete_num));
+	if( button(GenUIID(0), 0.5 + GetWindowWidth() / 4 - w / 2, GetWindowHeight() * 4 / 15 + fH * 2.3, w, h0, "删除") && delete_num[0]){
+		delete_book = S2N(delete_num);
+		if(delete_book > path_book) delete_book = 0;//越界，通过置零（节点0无用）解决 
+		/*有bug,删去两个后会出问题导致下下个被删 
+		while(f_path[delete_book] == 0) 
+			delete_book++;//遇到已经删除过的编号，通过顺延来删除 
+		*/
+		f_path[delete_book] = 0;
+		n = 0;
+		while(delete_num[n]){
+			delete_num[n] = 0;
 			n++;
 		}//清空文本框 
 	}
+	
 	SetPenColor("Blue");
 	drawRectangle(x_List - TextStringWidth("EEEEEEEE"), GetWindowWidth() / 30, GetWindowWidth() * 7 / 12, GetWindowHeight(), 1);
 	int List_i = 1, row = 1;
 	SetPenColor("Green");
 	drawLabel(x_List - TextStringWidth("EEEEE"), y_List - fH , "已添加文件：");
+	char List_index[10] = "";
 	while(List_i <= path_book){
 		if(f_path[List_i]){
 			row++;
+			N2S(List_i, List_index);
+			drawLabel(x_List - TextStringWidth("EEEEEEE"), y_List - fH * (row + 1), List_index);
 			drawLabel(x_List - TextStringWidth("EEEEE"), y_List - fH * (row + 1), path_opened[List_i]);//在界面显示已添加文件
 		} 
 		List_i++;
-	}
+	}//输出已打开文件 
+	/*
+	while(List_i <= path_book){
+		int i_temp = 0;
+		if(f_path[List_i] == 0){
+			for(i_temp = List_i; i_temp < path_book; i_temp++){
+				f_path[i_temp] = f_path[i_temp + 1];
+				strcpy(path_opened[i_temp], path_opened[i_temp + 1]);
+			} 
+			path_book--;
+		} 
+		if(f_path[List_i]) List_i++;
+	}//重置编号 
+	*/
 }
 #endif
 
