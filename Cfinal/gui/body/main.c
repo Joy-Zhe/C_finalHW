@@ -85,7 +85,7 @@ void path(char *s_path, char *filename){
 void Menu(){
 	
 	static char *menuListAbout[] = {"关于", "帮助", "退出"};
-	double w = TextStringWidth(menuListAbout[0]) * 2, h = 0.4, x = 0, wsub = TextStringWidth(menuListAbout[2]) * 1.2, y = GetWindowHeight() - h;
+	double w = TextStringWidth(menuListAbout[0]) * 2, h = 0.4, x = 0, wsub = TextStringWidth("。菜单") * 1.2, y = GetWindowHeight() - h;
 	static char *selectedLabel = NULL;
 	//以下与按钮关联 
 	double fH1 = GetFontHeight();
@@ -93,7 +93,6 @@ void Menu(){
 	double x1 = GetWindowWidth() / 2.5; 
 	double y1 = 0;
 	double w1 = GetWindowWidth() / 5; // 控件宽度
-	char s[] = "当前速度：";
 	int selection;
  
 	selection = menuList(GenUIID(0), x, y, w, wsub, h, menuListAbout, sizeof(menuListAbout)/sizeof(menuListAbout[0]));
@@ -140,11 +139,11 @@ void typeArea(){
 	SetPenColor("Yellow"); 
 	drawRectangle(0.5, GetWindowHeight() / 4, GetWindowWidth() / 2, GetWindowHeight() / 2, 1);
 	SetPenColor("Black");
-	drawLabel(0.8, y + fH * 3 + 0.1, "输入路径：");
-	drawLabel(0.8, y - fH * 3 + 0.1, "输入文件名：");
-	textbox(GenUIID(0), 0.8 + TextStringWidth("输入文件名："), y + fH * 2.7, GetWindowWidth() / 3, h, path1, sizeof(path1));
-	textbox(GenUIID(0), 0.8 + TextStringWidth("输入文件名："), y - fH * 2.7, GetWindowWidth() / 3, h, filename1, sizeof(filename1));
-	if( button(GenUIID(0), 0, 0, w, h0, "添加") && path1[0]){
+	drawLabel(0.8, y + fH * 5 + 0.1, "输入路径：");
+	drawLabel(0.8, y + 0.1, "输入文件名：");
+	textbox(GenUIID(0), 0.8 + TextStringWidth("输入文件名："), y + fH * 4.7, GetWindowWidth() / 3, h, path1, sizeof(path1));
+	textbox(GenUIID(0), 0.8 + TextStringWidth("输入文件名："), y , GetWindowWidth() / 3, h, filename1, sizeof(filename1));
+	if( button(GenUIID(0), 0.5 + GetWindowWidth() / 4 - w / 2, GetWindowHeight() / 3, w, h0, "添加") && path1[0]){
 		//path(path1, filename1);//打开文件进行操作
 		flag_button = 1;
 		path_book++;
@@ -157,9 +156,29 @@ void typeArea(){
 			n++;
 		}//清空文本框 
 	}
-	int List_i = 1;
+	if( button(GenUIID(0), 0.5 + GetWindowWidth() / 4 - w / 2, GetWindowHeight() * 4 / 15, w, h0, "删除") && path1[0]){
+		//path(path1, filename1);//打开文件进行操作
+		flag_button = 1;
+		path_book++;
+		f_path[path_book] = 1;
+		sprintf(path_opened[path_book], "%s%s", path1, filename1);
+		fp[path_book] = fopen(path_opened[path_book], "w");//打开文件 
+		while(path1[n] || filename1[n]){
+			path1[n] = 0;
+			filename1[n] = 0;
+			n++;
+		}//清空文本框 
+	}
+	SetPenColor("Blue");
+	drawRectangle(x_List - TextStringWidth("EEEEEEEE"), GetWindowWidth() / 30, GetWindowWidth() * 7 / 12, GetWindowHeight(), 1);
+	int List_i = 1, row = 1;
+	SetPenColor("Green");
+	drawLabel(x_List - TextStringWidth("EEEEE"), y_List - fH , "已添加文件：");
 	while(List_i <= path_book){
-		drawLabel(x_List - TextStringWidth("EEEEEEEEEEEEEEE"), y_List - fH * List_i, path_opened[List_i]);//在界面显示已添加文件
+		if(f_path[List_i]){
+			row++;
+			drawLabel(x_List - TextStringWidth("EEEEE"), y_List - fH * (row + 1), path_opened[List_i]);//在界面显示已添加文件
+		} 
 		List_i++;
 	}
 }
